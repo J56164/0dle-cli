@@ -1,15 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <curses.h>
-
-const char FULL_BLOCK_CHAR = '\xDB';
-const char TABLE_HORIZONTAL_CHAR = '\xB3';
-const char TABLE_VERTICAL_CHAR = '\xC4';
-const char TABLE_DOWN_LEFT_CHAR = '\xBF';
-const char TABLE_UP_RIGHT_CHAR = '\xC0';
-const char TABLE_UP_LEFT_CHAR = '\xD9';
-const char TABLE_DOWN_RIGHT_CHAR = '\xDA';
+#include <PDCurses-3.9/curses.h>
+#include <nlohmann/json.hpp>
 
 std::vector<std::string> logo = {
     "  ######## ######## ######## ########  \n",
@@ -47,9 +40,6 @@ void title_screen() {
         int keypress = read_keypress();
     }
 }
-
-// https://en.wikipedia.org/wiki/Code_page_437
-// https://en.wikipedia.org/wiki/ANSI_escape_code
 
 int main() {
     WINDOW* MAIN_WIN = initscr();
