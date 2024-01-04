@@ -1,22 +1,31 @@
 {
     "tasks": [
         {
+            "type": "shell",
+            "label": "run the makefile",
+            "command": "C:/MinGW/bin/mingw32-make.exe",
+            "args": ["${fileBasenameNoExtension}.exe"],
+            "problemMatcher": [],
+        },
+        {
             "type": "cppbuild",
             "label": "C/C++: g++.exe build active file",
-            "command": "C:\\MinGW\\bin\\g++.exe",
+            "command": "C:/MinGW/bin/g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "${fileDirname}/${fileBasenameNoExtension}.exe",
+                "-I${workspaceFolder}/include",
+                "-L${workspaceFolder}/include/PDCurses-3.9",
                 "-lpdcurses"
             ],
             "options": {
                 "cwd": "${fileDirname}"
             },
             "problemMatcher": [
-                "$gcc"
+                "$msCompile"
             ],
             "group": {
                 "kind": "build",

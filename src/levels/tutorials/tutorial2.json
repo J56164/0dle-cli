@@ -1,0 +1,93 @@
+{
+    "name": "Tutorial 2: Buying Upgrades",
+    "currencies": [
+        {
+            "name": "coins",
+            "effects": [
+                
+            ]
+        },
+        {
+            "name": "farmers",
+            "effects": [
+                {
+                    "name": "coins",
+                    "increment": 5
+                }
+            ]
+        }
+    ],
+    "inits": [
+        {
+            "name": "coins",
+            "amount": 20
+        }, {
+            "name": "farmers",
+            "amount": 20
+        }
+    ],
+    "upgrades": [
+        {
+            "name": "Buy a farmer",
+            "effect": [
+                {
+                    "name": "farmers",
+                    "increment": 1
+                }, {
+                    "name": "coins",
+                    "increment": -20
+                }
+            ],
+            "requirements": [
+                {
+                    "name": "coins",
+                    "range": {
+                        "ge": 20
+                    }
+                }
+            ]
+        }
+    ],
+    "objectives": [
+        {
+            "name": "Main Objective",
+            "requirements": [],
+            "subObjectives": [
+                {
+                    "name": "Buy a farmer",
+                    "requirements": [
+                        {
+                            "name": "farmer",
+                            "range": {
+                                "ge": 1
+                            }
+                        }
+                    ],
+                    "subObjectives": []
+                }, {
+                    "name": "Wait until you get 20 coins",
+                    "requirements": [
+                        {
+                            "name": "coins",
+                            "range": {
+                                "ge": 20
+                            }
+                        }
+                    ],
+                    "subObjectives": []
+                }, {
+                    "name": "Buy another farmer",
+                    "requirements": [
+                        {
+                            "name": "farmer",
+                            "range": {
+                                "ge": 2
+                            }
+                        }
+                    ],
+                    "subObjectives": []
+                }
+            ]
+        }
+    ]
+}
