@@ -1,3 +1,4 @@
+#include <exception>
 #include <filesystem>
 #include <functional>
 #include <iostream>
@@ -70,7 +71,7 @@ private:
                 }
                 move(y + i + 1, x);
             }
-            int keypress = getch();
+            int keypress = get_keypress();
             switch (keypress) {
                 case KEY_UP:
                     choice--;
@@ -85,7 +86,10 @@ private:
                     }
                     break;
                 case KEY_ENTER: case 10: case 13:
-                    move(y + choices.size(), x);
+                    is_chosen = true;
+                    break;
+                case 27: // ESC
+                    choice = -1;
                     is_chosen = true;
                     break;
             }
@@ -102,6 +106,9 @@ private:
         std::vector<std::string> choices = {"Play", "About", "Quit"};
         int choice = handle_choices(choices);
         switch (choice) {
+            case -1:
+                exit(0);
+                break;
             case 0:
                 next_screen = [this](){play_screen();};
                 break;
@@ -114,11 +121,20 @@ private:
         }
     }
 
+    int get_keypress() {
+        int keypress = getch();
+        if (keypress == 3) {
+            std::cout << "amogus" << std::endl;
+            exit(0xC000013A);
+        }
+        return keypress;
+    }
+
     void about_screen() {
         clear();
         move(0, 0);
         printw("About description here.");
-        getch();
+        get_keypress();
         next_screen = [this](){title_screen();};
     }
 
@@ -126,7 +142,7 @@ private:
         clear();
         move(0, 0);
         printw("Play screen (not yet implemented).");
-        getch();
+        get_keypress();
         next_screen = [this](){title_screen();};
     }
 };
