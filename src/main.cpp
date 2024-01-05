@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -13,7 +14,9 @@ public:
         noecho();
         curs_set(false);
         keypad(stdscr, TRUE);
-        title_screen();
+        while (!is_game_ended) {
+            next_screen();
+        }
         endwin();
     }
 
@@ -33,6 +36,9 @@ private:
         "                                       \n",
         "  ████████ ████████ ████████ ████████  \n",
     };
+    bool is_game_ended = false;
+
+    std::function<void(void)> next_screen = [this](){title_screen();};
 
     void print_logo() {
         for (int i = 0; i < logo.size(); i++) {
@@ -48,9 +54,9 @@ private:
     int handle_choices(std::vector<std::string>& choices) {
         int y, x;
         getyx(stdscr, y, x);
-        bool end = false;
+        bool is_chosen = false;
         int choice = 0;
-        while (!end) {
+        while (!is_chosen) {
             for (int i = 0; i < choices.size(); i++) {
                 if (choice == i) {
                     attr_on(A_STANDOUT, stdscr);
@@ -80,7 +86,7 @@ private:
                     break;
                 case KEY_ENTER: case 10: case 13:
                     move(y + choices.size(), x);
-                    end = true;
+                    is_chosen = true;
                     break;
             }
             move(y, x);
@@ -97,11 +103,13 @@ private:
         int choice = handle_choices(choices);
         switch (choice) {
             case 0:
+                next_screen = [this](){play_screen();};
                 break;
             case 1:
-                about_screen();
+                next_screen = [this](){about_screen();};
                 break;
             case 2:
+                is_game_ended = true;
                 break;
         }
     }
@@ -109,9 +117,17 @@ private:
     void about_screen() {
         clear();
         move(0, 0);
-        printw("About description here");
+        printw("About description here.");
         getch();
-        title_screen();
+        next_screen = [this](){title_screen();};
+    }
+
+    void play_screen() {
+        clear();
+        move(0, 0);
+        printw("Play screen (not yet implemented).");
+        getch();
+        next_screen = [this](){title_screen();};
     }
 };
 
