@@ -124,7 +124,6 @@ private:
     int get_keypress() {
         int keypress = getch();
         if (keypress == 3) {
-            std::cout << "amogus" << std::endl;
             exit(0xC000013A);
         }
         return keypress;
