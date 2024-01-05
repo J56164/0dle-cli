@@ -17,8 +17,8 @@ public:
     }
 };
 
-int main() {
-    // std::cout << std::filesystem::current_path() << std::endl;
-    Logic("levels/tutorials/tutorial1.json");
-    std::cout << "done" << std::endl;
-}
+// int main() {
+//     // std::cout << std::filesystem::current_path() << std::endl;
+//     Logic("levels/tutorials/tutorial1.json");
+//     std::cout << "done" << std::endl;
+// }
