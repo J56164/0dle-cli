@@ -1,18 +1,17 @@
 {
     "name": "Tutorial 2: Buying Upgrades",
-    "description": "blah\nblah",
     "currencies": [
         {
-            "name": "Coin",
+            "name": "coins",
             "effects": [
                 
             ]
         },
         {
-            "name": "Farmer",
+            "name": "farmers",
             "effects": [
                 {
-                    "name": "Coin",
+                    "name": "coins",
                     "increment": 5
                 }
             ]
@@ -20,30 +19,31 @@
     ],
     "inits": [
         {
-            "name": "Coin",
+            "name": "coins",
             "amount": 20
         }, {
-            "name": "Farmer",
+            "name": "farmers",
             "amount": 20
         }
     ],
-    "actions": [
+    "upgrades": [
         {
             "name": "Buy a farmer",
-            "effects": [
+            "effect": [
                 {
-                    "name": "Farmer",
+                    "name": "farmers",
                     "increment": 1
                 }, {
-                    "name": "Coin",
+                    "name": "coins",
                     "increment": -20
                 }
             ],
             "requirements": [
                 {
-                    "name": "Coin",
-                    "type": "greater-equal",
-                    "amount": 20
+                    "name": "coins",
+                    "range": {
+                        "ge": 20
+                    }
                 }
             ]
         }
@@ -57,9 +57,10 @@
                     "name": "Buy a farmer",
                     "requirements": [
                         {
-                            "name": "Farmer",
-                            "type": "greater-equal",
-                            "amount": 1
+                            "name": "farmer",
+                            "range": {
+                                "ge": 1
+                            }
                         }
                     ],
                     "subObjectives": []
@@ -67,9 +68,10 @@
                     "name": "Wait until you get 20 coins",
                     "requirements": [
                         {
-                            "name": "Coin",
-                            "type": "greater-equal",
-                            "amount": 20
+                            "name": "coins",
+                            "range": {
+                                "ge": 20
+                            }
                         }
                     ],
                     "subObjectives": []
@@ -77,9 +79,10 @@
                     "name": "Buy another farmer",
                     "requirements": [
                         {
-                            "name": "Farmer",
-                            "type": "greater-equal",
-                            "amount": 2
+                            "name": "farmer",
+                            "range": {
+                                "ge": 2
+                            }
                         }
                     ],
                     "subObjectives": []

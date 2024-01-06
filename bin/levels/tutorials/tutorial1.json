@@ -1,9 +1,8 @@
 {
     "name": "Tutorial 1: Getting Money",
-    "description": "blah\nblah",
     "currencies": [
         {
-            "name": "Coin",
+            "name": "coins",
             "effects": [
                 
             ]
@@ -11,16 +10,16 @@
     ],
     "inits": [
         {
-            "name": "Coin",
+            "name": "coins",
             "amount": 10
         }
     ],
-    "actions": [
+    "upgrades": [
         {
-            "name": "+5 Coin",
-            "effects": [
+            "name": "+5 coins",
+            "effect": [
                 {
-                    "name": "Coin",
+                    "name": "coins",
                     "increment": 5
                 }
             ],
@@ -36,9 +35,10 @@
                     "name": "Select the upgrade and get to 20 coins",
                     "requirements": [
                         {
-                            "name": "Coin",
-                            "type": "greater-equal",
-                            "amount": 20
+                            "name": "coins",
+                            "range": {
+                                "ge": 20
+                            }
                         }
                     ],
                     "subObjectives": []

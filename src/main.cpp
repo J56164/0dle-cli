@@ -6,23 +6,30 @@
 #include <PDCurses-3.9/curses.h>
 #include <PDCurses-3.9/panel.h>
 #include <nlohmann/json.hpp>
-#include "logic.cpp"
+#include "level.h"
+#include "file_tools.h"
+#include "window_tools.h"
 
 class Game {
-public:    
-    void start() {
-        stdscr = initscr();
+public:
+    Game(): main_window(MyWindow(initscr())) {
         noecho();
         curs_set(false);
         keypad(stdscr, TRUE);
-        while (!is_game_ended) {
-            next_screen();
-        }
+    }
+
+    ~Game() {
         endwin();
     }
 
+    void start() {
+        while (!is_game_ended) {
+            next_screen();
+        }
+    }
+
 private:
-    WINDOW* stdscr;
+    MyWindow main_window;
     std::vector<std::string> logo = {
         "  ████████ ████████ ████████ ████████  \n",
         "                                       \n",
@@ -38,94 +45,130 @@ private:
         "  ████████ ████████ ████████ ████████  \n",
     };
     bool is_game_ended = false;
+    std::vector<std::string> curr_path = {"levels"};
     std::function<void(void)> next_screen = [this](){title_screen();};
 
     void title_screen() {
-        clear();
-        wmove(stdscr, 0, 0);
-        print_logo();
-        int y, x;
-        getyx(stdscr, y, x);
-        WINDOW* choices_window = newwin(3, 8, y, x);
-        wrefresh(stdscr);
+        main_window.clear();
+        MyWindow logo_window(logo.size(), logo[0].size(), 1, 2);
+        logo_window.setParent(main_window);
+        logo_window.moveCursor(0, 0);
+        logo_window.printLines(logo);
+        logo_window.refresh();
+        MyWindowBordered choices_window(5, 10, logo.size() + 3, 2);
+        choices_window.setParent(main_window);
         std::vector<std::string> choices = {"Play", "About", "Quit"};
-        int choice = handle_choices(choices, choices_window);
+        int choice = handle_choices(choices, choices_window.contentWindow);
         switch (choice) {
-            case -1:
-                is_game_ended = true;
-                break;
             case 0:
                 next_screen = [this](){level_select_screen();};
                 break;
             case 1:
                 next_screen = [this](){about_screen();};
                 break;
-            case 2:
+            case -1: case 2:
                 is_game_ended = true;
                 break;
         }
     }
 
     void about_screen() {
-        clear();
-        wmove(stdscr, 0, 0);
-        WINDOW* load_window = newwin(10, 40, 1, 2);
-        refresh();
-        box(load_window, 0, 0);
-        wrefresh(load_window);
-        mvwprintw(load_window, 1, 1, "About description here.");
-        wrefresh(load_window);
+        main_window.clear();
+        main_window.moveCursor(0, 0);
+        MyWindowBordered about_window(10, 40, 1, 2);
+        about_window.setParent(main_window);
+        about_window.printContent("About description here.");
+        about_window.refresh();
         get_keypress();
         next_screen = [this](){title_screen();};
     }
 
     void level_select_screen() {
-        clear();
-        wmove(stdscr, 0, 0);
-        WINDOW* load_window = newwin(10, 40, 1, 2);
-        refresh();
-        box(load_window, 0, 0);
-        wrefresh(load_window);
-        mvwprintw(load_window, 0, 0, "/tutorials");
-        wrefresh(load_window);
-        std::vector<std::string> files = {"..", "tutorial1.json", "tutorial2.json", "(I didn't implement this yet)"};
-        handle_choices(files, load_window, 1, 1);
-        next_screen = [this](){title_screen();};
-    }
-
-    void print_logo() {
-        for (int i = 0; i < logo.size(); i++) {
-            std::string line = logo[i];
-            wmove(stdscr, i + 1, 2);
-            wprintw(stdscr, line.c_str());
+        main_window.clear();
+        main_window.moveCursor(0, 0);
+        MyWindowBordered description_window(4, 80, 1, 2);
+        description_window.setParent(main_window);
+        std::vector<std::string> descriptions = {
+            "Level Select",
+            "Up/Down to navigate, Enter to select, Escape to go back to title screen"
+        };
+        description_window.printLinesContent(descriptions);
+        description_window.refresh();
+        MyWindowBordered load_window(20, 80, 6, 2);
+        load_window.setParent(main_window);
+        while (true) {
+            load_window.print(FileTools::GetJoinedPath(curr_path));
+            load_window.refresh();
+            std::vector<FileTools::File> files = FileTools::GetFiles(curr_path);
+            std::vector<std::string> filenames(files.size() + 1);
+            filenames[0] = "..";
+            for (int i = 0; i < files.size(); i++) {
+                filenames[i + 1] = files[i].filename;
+            }
+            int choice = handle_choices(filenames, load_window.contentWindow);
+            if (choice == -1) {
+                curr_path = {"levels"};
+                next_screen = [this](){title_screen();};
+                return;
+            }
+            int file_index = choice - 1;
+            if (file_index == -1) {
+                if (curr_path.size() == 1) {
+                    next_screen = [this](){title_screen();};
+                    return;
+                } else {
+                    curr_path.pop_back();
+                }
+            } else if (files[file_index].is_directory == false) {
+                curr_path.push_back(files[file_index].filename);
+                std::string joined_path = FileTools::GetJoinedPath(curr_path);
+                next_screen = [this, joined_path](){play_screen(joined_path);};
+                curr_path.pop_back();
+                return;
+            } else {
+                curr_path.push_back(files[file_index].filename);
+            }
+            load_window.clear();
         }
-        wprintw(stdscr, "\n");
-        wprintw(stdscr, "\n");
-        refresh();
     }
 
-    int handle_choices(std::vector<std::string>& choices, WINDOW* curr_window) {
+    void play_screen(std::string joined_filepath) {
+        main_window.clear();
+        main_window.moveCursor(0, 0);
+        MyWindowBordered status_window(4, 80, 1, 2);
+        status_window.setParent(main_window);
+        std::vector<std::string> descriptions = {
+            "Play screen here.",
+            joined_filepath
+        };
+        status_window.printLinesContent(descriptions);
+        status_window.refresh();
+        MyWindowBordered play_window(20, 80, 6, 2);
+        play_window.setParent(main_window);
+        get_keypress();
+        next_screen = [this](){level_select_screen();};
+    }
+
+    int handle_choices(std::vector<std::string>& choices, MyWindow& curr_window) {
         return handle_choices(choices, curr_window, 0, 0); 
     }
 
-    int handle_choices(std::vector<std::string>& choices, WINDOW* curr_window, int start_y, int start_x) {
+    int handle_choices(std::vector<std::string>& choices, MyWindow& curr_window, int start_y, int start_x) {
         bool is_chosen = false;
         int choice = 0;
         while (!is_chosen) {
             for (int i = 0; i < choices.size(); i++) {
-                wmove(curr_window, start_y + i, start_x + 0);
+                curr_window.moveCursor(start_y + i, start_x);
+                curr_window.clearLine();
                 if (choice == i) {
-                    wattr_on(curr_window, A_STANDOUT, curr_window);
-                    wprintw(curr_window, ">> ");
+                    curr_window.setAttribute(A_STANDOUT, true);
+                    curr_window.print(">> " + choices[i]);
+                    curr_window.setAttribute(A_STANDOUT, false);
                 } else {
-                    wprintw(curr_window, "   ");
-                }
-                wprintw(curr_window, choices[i].c_str());
-                if (choice == i) {
-                    wattr_off(curr_window, A_STANDOUT, curr_window);
+                    curr_window.print("   " + choices[i]);
                 }
             }
-            wrefresh(curr_window);
+            curr_window.refresh();
 
             int keypress = get_keypress();
             switch (keypress) {
@@ -149,7 +192,7 @@ private:
                     is_chosen = true;
                     break;
             }
-            wmove(curr_window, start_y + 0, start_x + 0);
+            curr_window.moveCursor(start_y, start_x);
         }
 
         return choice;
@@ -166,5 +209,7 @@ private:
 };
 
 int main() {
-    Game().start();
+    Game* game = new Game();
+    game->start();
+    delete game;
 }
