@@ -1,6 +1,6 @@
 {
     "name": "Level 2: Buying Upgrades",
-    "description": "blah\nblah",
+    "description": "Sometimes actions requires other currencies.",
     "currencies": [
         {
             "name": "Coin",
@@ -25,9 +25,6 @@
         }, {
             "name": "Farmer",
             "amount": 0
-        }, {
-            "name": "Turns",
-            "amount": 3
         }
     ],
     "actions": [

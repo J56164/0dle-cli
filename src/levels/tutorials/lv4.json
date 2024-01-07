@@ -1,6 +1,6 @@
 {
     "name": "Level 4: Choices",
-    "description": "blah\nblah",
+    "description": "Choose wisely.",
     "currencies": [
         {
             "name": "Coin",
@@ -25,9 +25,6 @@
         }, {
             "name": "Farmer",
             "amount": 0
-        }, {
-            "name": "Turns",
-            "amount": 3
         }
     ],
     "actions": [

@@ -176,7 +176,7 @@ private:
             description_window.setParent(game.main_window);
             std::vector<std::string> descriptions = {
                 "Level Select",
-                "Up/Down to navigate, Enter to select, Escape to go back to title screen"
+                "Up/Down to navigate, Enter to select, Esc to go back to title screen"
             };
             description_window.printLinesContent(descriptions);
             description_window.refresh();
@@ -226,7 +226,11 @@ private:
     public:
         PlayScreen(Game& game, std::string& joined_path)
         : game(game), level(Level::fromFile(joined_path)), state(State(level)),
-        statusWindow(MyWindowBordered(5, 80, 1, 2)), playWindow(MyWindowBordered(20, 80, 7, 2)) {}
+        statusWindow(MyWindowBordered(5, 80, 1, 2)), playWindow(MyWindowBordered(16, 80, 9, 2)),
+        descriptionButtonWindow(MyWindowBordered(3, 19, 7, 2)), currenciesButtonWindow(MyWindowBordered(3, 18, 7, 20)),
+        actionsButtonWindow(MyWindowBordered(3, 15, 7, 37)), goalsButtonWindow(MyWindowBordered(3, 13, 7, 51)),
+        stepBackButtonWindow(MyWindowBordered(3, 23, 26, 2)), stepForwardButtonWindow(MyWindowBordered(3, 22, 26, 60)),
+        turnCountWindow(MyWindowBordered(3, 17, 26, 35)) {}
 
         void show() {
             game.main_window.clear();
@@ -235,28 +239,57 @@ private:
             updateStatus();
             playWindow.setParent(game.main_window);
             showDescription();
+            descriptionButtonWindow.setParent(game.main_window);
+            currenciesButtonWindow.setParent(game.main_window);
+            actionsButtonWindow.setParent(game.main_window);
+            goalsButtonWindow.setParent(game.main_window);
+            updatePageButtons();
+            stepBackButtonWindow.setParent(game.main_window);
+            stepForwardButtonWindow.setParent(game.main_window);
+            updateStepButtons();
+            turnCountWindow.setParent(game.main_window);
+            updateTurn();
             while (true) {
                 int keypress = game.get_keypress();
                 switch (keypress) {
                     case 'd':
                         showDescription();
+                        updatePageButtons();
                         break;
                     case 'c':
                         showCurrencies();
+                        updatePageButtons();
                         break;
                     case 'a':
                         showActions();
+                        updatePageButtons();
                         break;
                     case 'g':
                         showGoals();
+                        updatePageButtons();
                         break;
-                    case '<':
+                    case KEY_BACKSPACE: case '\b': case 127:
+                        if (state.turns != 0) {
+                            selectedActionId = *state.pastActionIds.rbegin();
+                            state.calculatePreviousTurn();
+                        }
+                        updateStatus();
                         break;
-                    case '>':
+                    case KEY_ENTER: case 10: case 13:
+                        if (!state.selectableActionIds.empty()) {
+                            state.calculateNextTurn(selectedActionId);
+                        }
+                        updateStatus();
                         break;
                     case KEY_UP:
+                        if (currentPage == "actions") {
+                            selectPreviousAction();
+                        }
                         break;
                     case KEY_DOWN:
+                        if (currentPage == "actions") {
+                            selectNextAction();
+                        }
                         break;
                     case 27: // ESC
                         game.setNextScreen(std::bind(&levelSelectScreen, &game));
@@ -267,17 +300,126 @@ private:
 
         void updateStatus() {
             statusWindow.clearContent();
-            statusWindow.printContent(level.name);
+            statusWindow.printContent(level.name + "\n");
+            if (state.selectableActionIds.empty()) {
+                statusWindow.printContent("No selectable actions. Please step back.\n");
+                selectedActionId = -1;
+            } else {
+                std::set<int>::iterator next_selected_action_id_ptr = state.selectableActionIds.lower_bound(selectedActionId);
+                if (next_selected_action_id_ptr == state.selectableActionIds.end()) {
+                    selectedActionId = *state.selectableActionIds.rend();
+                } else {
+                    selectedActionId = *next_selected_action_id_ptr;
+                }
+            }
+            if (state.isAllGoalsCompleted()) {
+                statusWindow.printContent("All goals completed! Go back (Esc) or continue playing.\n");
+            }
             statusWindow.refresh();
+            updateStepButtons();
+            updateTurn();
+            showPage();
+        }
+
+        void updatePageButtons() {
+            descriptionButtonWindow.clearContent();
+            if (currentPage == "description") {
+                descriptionButtonWindow.printContent(">Description (d)<");
+            } else {
+                descriptionButtonWindow.printContent(" Description (d) ");
+            }
+            descriptionButtonWindow.refresh();
+
+            currenciesButtonWindow.clearContent();
+            if (currentPage == "currencies") {
+                currenciesButtonWindow.printContent(">Currencies (c)<");
+            } else {
+                currenciesButtonWindow.printContent(" Currencies (c) ");
+            }
+            currenciesButtonWindow.refresh();
+
+            actionsButtonWindow.clearContent();
+            if (currentPage == "actions") {
+                actionsButtonWindow.printContent(">Actions (a)<");
+            } else {
+                actionsButtonWindow.printContent(" Actions (a) ");
+            }
+            actionsButtonWindow.refresh();
+
+            goalsButtonWindow.clearContent();
+            if (currentPage == "goals") {
+                goalsButtonWindow.printContent(">Goals (g)<");
+            } else {
+                goalsButtonWindow.printContent(" Goals (g) ");
+            }
+            goalsButtonWindow.refresh();
+        }
+
+        void updateStepButtons() {
+            stepBackButtonWindow.clearContent();
+            if (state.turns != 0) {
+                stepBackButtonWindow.printContent("Step Back (Backspace)");
+            }
+            stepBackButtonWindow.refresh();
+
+            stepForwardButtonWindow.clearContent();
+            if (!state.selectableActionIds.empty()) {
+                stepForwardButtonWindow.printContent("Step Forward (Enter)");
+            }
+            stepForwardButtonWindow.refresh();
+        }
+
+        void updateTurn() {
+            turnCountWindow.clearContent();
+            turnCountWindow.printContent("Turns: " + std::to_string(state.turns));
+            turnCountWindow.refresh();
+        }
+
+        void showPage() {
+            if (currentPage == "description") {
+                showDescription();
+            } else if (currentPage == "currencies") {
+                showCurrencies();
+            } else if (currentPage == "actions") {
+                showActions();
+            } else if (currentPage == "goals") {
+                showGoals();
+            }
+        }
+
+        void selectNextAction() {
+            std::set<int>::iterator selected_action_ptr = state.selectableActionIds.find(selectedActionId);
+            if (selected_action_ptr == state.selectableActionIds.end()) {
+                selectedActionId = -1;
+            } else if (std::next(selected_action_ptr, 1) == state.selectableActionIds.end()) {
+                selectedActionId = *state.selectableActionIds.begin();
+            } else {
+                selectedActionId = *std::next(selected_action_ptr, 1);
+            }
+            showActions();
+        }
+
+        void selectPreviousAction() {
+            std::set<int>::iterator selected_action_ptr = state.selectableActionIds.find(selectedActionId);
+            if (selected_action_ptr == state.selectableActionIds.end()) {
+                selectedActionId = -1;
+            } else if (selected_action_ptr == state.selectableActionIds.begin()) {
+                selectedActionId = *state.selectableActionIds.rbegin();
+            } else {
+                selectedActionId = *std::prev(selected_action_ptr, 1);
+            }
+            showActions();
         }
         
         void showDescription() {
+            currentPage = "description";
             playWindow.clearContent();
             playWindow.printContent(level.description);
             playWindow.refresh();
         }
         
         void showCurrencies() {
+            currentPage = "currencies";
             playWindow.clearContent();
             for (int currency_id = 0; currency_id < level.currencyCount; currency_id++) {
                 Currency& currency = level.currencies[currency_id];
@@ -292,10 +434,22 @@ private:
         }
         
         void showActions() {
+            currentPage = "actions";
             playWindow.clearContent();
             for (int action_id = 0; action_id < level.actionCount; action_id++) {
                 Action& action = level.actions[action_id];
-                playWindow.printContent("[ ] " + action.name + "\n");
+                if (action_id == selectedActionId) {
+                    playWindow.contentWindow.setAttribute(A_STANDOUT, true);
+                }
+
+                if (state.selectableActionIds.find(action_id) == state.selectableActionIds.end()) {
+                    playWindow.printContent("[x] ");
+                } else if (action_id == selectedActionId) {
+                    playWindow.printContent("[*] ");
+                } else {
+                    playWindow.printContent("[ ] ");
+                }
+                playWindow.printContent(action.name + "\n");
                 if (!action.effects.empty()) {
                     printEffects(action.effects, 1);
                 }
@@ -303,11 +457,16 @@ private:
                     printRequirements(action.requirements, 1);
                 }
                 playWindow.printContent("\n");
+
+                if (action_id == selectedActionId) {
+                    playWindow.contentWindow.setAttribute(A_STANDOUT, false);
+                }
             }
             playWindow.refresh();
         }
 
         void showGoals() {
+            currentPage = "goals";
             playWindow.clearContent();
             for (Goal& goal: level.goals) {
                 printGoal(goal, 0);
@@ -347,7 +506,7 @@ private:
             int amount = state.currencyAmounts[currency_id];
             playWindow.printContent(requirement.name + " (" + std::to_string(amount) + ") ");
             std::string symbol = compareTypeToSymbol[requirement.type];
-            playWindow.printContent(symbol + " " + std::to_string(requirement.amount));
+            playWindow.printContent(symbol + " " + std::to_string(requirement.amount) + "\n");
         }
 
         void printGoal(Goal& goal, int tabs) {
@@ -375,6 +534,13 @@ private:
         State state;
         MyWindowBordered statusWindow;
         MyWindowBordered playWindow;
+        MyWindowBordered descriptionButtonWindow;
+        MyWindowBordered currenciesButtonWindow;
+        MyWindowBordered actionsButtonWindow;
+        MyWindowBordered goalsButtonWindow;
+        MyWindowBordered stepBackButtonWindow;
+        MyWindowBordered stepForwardButtonWindow;
+        MyWindowBordered turnCountWindow;
         std::unordered_map<std::string, std::string> compareTypeToSymbol = {
             {"greater-equal", ">="},
             {"greater", ">"},
@@ -383,6 +549,8 @@ private:
             {"equal", "=="},
             {"not-equal", "!="},
         };
+        int selectedActionId;
+        std::string currentPage = "description";
     };
 
     void titleScreen() {

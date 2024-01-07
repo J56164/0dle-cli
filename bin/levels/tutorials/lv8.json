@@ -1,6 +1,6 @@
 {
     "name": "Level 8: Combined",
-    "description": "blah\nblah",
+    "description": "Use what you know.",
     "currencies": [
         {
             "name": "Coin",
@@ -21,13 +21,10 @@
     "inits": [
         {
             "name": "Coin",
-            "amount": 3
+            "amount": 5
         }, {
             "name": "Farmer",
             "amount": 0
-        }, {
-            "name": "Turns",
-            "amount": 5
         }
     ],
     "actions": [

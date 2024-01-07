@@ -1,6 +1,6 @@
 {
     "name": "Level 3: Patience is the key",
-    "description": "blah\nblah",
+    "description": "You can wait in some levels.",
     "currencies": [
         {
             "name": "Coin",
@@ -25,9 +25,6 @@
         }, {
             "name": "Farmer",
             "amount": 1
-        }, {
-            "name": "Turns",
-            "amount": 2
         }
     ],
     "actions": [

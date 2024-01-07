@@ -1,6 +1,6 @@
 {
     "name": "Level 7: Sacrifice",
-    "description": "blah\nblah",
+    "description": "You can sell currencies to get the main currency in some levels.",
     "currencies": [
         {
             "name": "Coin",
@@ -25,9 +25,6 @@
         }, {
             "name": "Farmer",
             "amount": 2
-        }, {
-            "name": "Turns",
-            "amount": 3
         }
     ],
     "actions": [

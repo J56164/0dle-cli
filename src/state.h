@@ -4,6 +4,7 @@
 #include <iostream>
 #include <exception>
 #include <unordered_map>
+#include <set>
 #include <vector>
 #include "level.h"
 
@@ -13,6 +14,7 @@ public:
     int turns = 0;
     std::vector<int> currencyAmounts;
     std::vector<int> pastActionIds;
+    std::set<int> selectableActionIds;
 
     State(Level& level): level(level) {
         currencyAmounts = std::vector<int>(level.currencyCount);
@@ -20,6 +22,8 @@ public:
             int currency_id = level.currencyNameToId[init.name];
             currencyAmounts[currency_id] = init.amount;
         }
+
+        updateSelectableActions();
     }
 
     void calculateNextTurn(int action_id) {
@@ -29,8 +33,6 @@ public:
                 throw std::invalid_argument("Action's requirement not fulfilled");
             }
         }
-        pastActionIds.push_back(action_id);
-        turns++;
 
         // Calculate action effects
         tempCurrencyAmounts = currencyAmounts;
@@ -49,6 +51,10 @@ public:
                 currencyAmounts[affected_currency_id] += effect.increment * currency_amount;
             }
         }
+
+        pastActionIds.push_back(action_id);
+        turns++;
+        updateSelectableActions();
     }
 
     void calculatePreviousTurn() {
@@ -78,19 +84,30 @@ public:
         }
 
         turns--;
+        updateSelectableActions();
     }
 
-    void checkGoals() {
-        for (Goal& goal: level.goals) {}
+    bool isAllGoalsCompleted() {
+        for (Goal& goal: level.goals) {
+            if (!isGoalCompleted(goal)) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    void checkGoal(Goal& goal) {
+    bool isGoalCompleted(Goal& goal) {
         for (Requirement& requirement: goal.requirements) {
-            isRequirementFulfilled(requirement);
+            if (!isRequirementFulfilled(requirement)) {
+                return false;
+            }
         }
         for (Goal& sub_goal: goal.subGoals) {
-            checkGoal(sub_goal);
+            if (!isGoalCompleted(sub_goal)) {
+                return false;
+            }
         }
+        return true;
     }
 
     bool isRequirementFulfilled(Requirement& requirement) {
@@ -111,6 +128,23 @@ public:
         }
 
         return result;
+    }
+
+    void updateSelectableActions() {
+        selectableActionIds.clear();
+        for (int action_id = 0; action_id < level.actionCount; action_id++) {
+            Action& action = level.actions[action_id];
+            bool is_all_requirement_fulfilled = true;
+            for (Requirement& requirement: action.requirements) {
+                if (!isRequirementFulfilled(requirement)) {
+                    is_all_requirement_fulfilled = false;
+                    break;
+                }
+            }
+            if (is_all_requirement_fulfilled) {
+                selectableActionIds.insert(action_id);
+            }
+        }
     }
 
 private:

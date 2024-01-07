@@ -1,20 +1,11 @@
 {
-    "name": "Level 1: Getting Upgrades",
-    "description": "blah\nblah",
+    "name": "Level 1: Introduction",
+    "description": "Welcome to 0dle!\n\nTo navigate through pages, press their corresponding hotkey.\nFor example, pressing 'c' will take you to the currencies page.\n\nYou can execute actions in the actions page by pressing Enter.\nTo step back, press Backspace.\n\nTo pass a level, you must complete all goals. View the goals page to see what you have to do.",
     "currencies": [
         {
             "name": "Coin",
             "effects": [
                 
-            ]
-        },
-        {
-            "name": "Farmer",
-            "effects": [
-                {
-                    "name": "Coin",
-                    "increment": 5
-                }
             ]
         }
     ],
@@ -22,33 +13,18 @@
         {
             "name": "Coin",
             "amount": 0
-        }, {
-            "name": "Farmer",
-            "amount": 0
-        }, {
-            "name": "Turns",
-            "amount": 2
         }
     ],
     "actions": [
         {
-            "name": "Buy a farmer",
+            "name": "Get coins",
             "effects": [
                 {
-                    "name": "Farmer",
-                    "increment": 1
-                }, {
                     "name": "Coin",
-                    "increment": 0
+                    "increment": 5
                 }
             ],
-            "requirements": [
-                {
-                    "name": "Coin",
-                    "type": "greater-equal",
-                    "amount": 0
-                }
-            ]
+            "requirements": []
         }
     ],
     "goals": [
