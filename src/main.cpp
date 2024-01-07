@@ -155,7 +155,13 @@ private:
             game.main_window.moveCursor(0, 0);
             MyWindowBordered about_window(20, 80, 1, 2);
             about_window.setParent(game.main_window);
-            about_window.printContent("About description here.");
+            about_window.printContent("0dle\n");
+            about_window.printContent("A non-idle idle game, playable in Windows console.\n");
+            about_window.printContent("\n");
+            about_window.printContent("Made by J56164 & Ginkglow\n");
+            about_window.printContent("Github: https://github.com/J56164/0dle-cli\n");
+            about_window.printContent("\n");
+            about_window.printContent("Press any key to continue.\n");
             about_window.refresh();
             game.get_keypress();
             game.setNextScreen(std::bind(&titleScreen, &game));
