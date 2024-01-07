@@ -1,6 +1,6 @@
 # 0dle
 
-A non-idle idle game, playable in Windows console.
+A non-idle idle game, playable in Windows terminal.
 
 ## How to compile
 
