@@ -1,3 +1,6 @@
+#ifndef WINDOW_TOOLS_H_
+#define WINDOW_TOOLS_H_
+
 #include <curses.h>
 #include <string>
 #include <vector>
@@ -116,3 +119,5 @@ public:
         contentWindow.clear();
     }
 };
+
+#endif

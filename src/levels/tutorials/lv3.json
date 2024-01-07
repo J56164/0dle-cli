@@ -1,0 +1,58 @@
+{
+    "name": "Level 3: Patience is the key",
+    "description": "blah\nblah",
+    "currencies": [
+        {
+            "name": "Coin",
+            "effects": [
+                
+            ]
+        },
+        {
+            "name": "Farmer",
+            "effects": [
+                {
+                    "name": "Coin",
+                    "increment": 1
+                }
+            ]
+        }
+    ],
+    "inits": [
+        {
+            "name": "Coin",
+            "amount": 4
+        }, {
+            "name": "Farmer",
+            "amount": 1
+        }, {
+            "name": "Turns",
+            "amount": 2
+        }
+    ],
+    "actions": [
+        {
+            "name": "Wait",
+            "effects": [
+                {
+                    "name": "Coin",
+                    "increment": 2
+                }
+            ],
+            "requirements": []
+        }
+    ],
+    "goals": [
+        {
+            "name": "Main Goal",
+            "requirements": [
+                {
+                    "name": "Coin",
+                    "type": "greater-equal",
+                    "amount": 10
+                }
+            ],
+            "subGoals": []
+        }
+    ]
+}

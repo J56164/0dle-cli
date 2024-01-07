@@ -1,3 +1,6 @@
+#ifndef FILE_TOOLS_H_
+#define FILE_TOOLS_H_
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -12,7 +15,7 @@ public:
         File(std::string filename, bool is_directory): filename(filename), is_directory(is_directory) {}
     };
 
-    static std::string GetJoinedPath(std::vector<std::string>& path) {
+    static std::string getJoinedPath(std::vector<std::string>& path) {
         std::string joined_path = "";
         for (int i = 0; i < path.size(); i++) {
             joined_path += path[i];
@@ -23,8 +26,8 @@ public:
         return joined_path;
     }
 
-    static std::vector<File> GetFiles(std::vector<std::string>& path) {
-        std::string find_path = GetJoinedPath(path);
+    static std::vector<File> getFiles(std::vector<std::string>& path) {
+        std::string find_path = getJoinedPath(path);
         find_path += "/*";
 
         std::vector<File> files;
@@ -45,3 +48,5 @@ public:
         return files;
     }
 };
+
+#endif

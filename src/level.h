@@ -1,6 +1,8 @@
+#ifndef LEVEL_H_
+#define LEVEL_H_
+
 #include <fstream>
 #include <string>
-#include <iostream>
 #include <nlohmann/json.hpp>
 
 struct Effect {
@@ -57,16 +59,16 @@ void from_json(const nlohmann::json& j, Action& action) {
     j.at("requirements").get_to(action.requirements);
 }
 
-struct Objective {
+struct Goal {
     std::string name;
     std::vector<Requirement> requirements;
-    std::vector<Objective> subObjectives;
+    std::vector<Goal> subGoals;
 };
 
-void from_json(const nlohmann::json& j, Objective& objective) {
-    j.at("name").get_to(objective.name);
-    j.at("requirements").get_to(objective.requirements);
-    j.at("subObjectives").get_to(objective.subObjectives);
+void from_json(const nlohmann::json& j, Goal& goal) {
+    j.at("name").get_to(goal.name);
+    j.at("requirements").get_to(goal.requirements);
+    j.at("subGoals").get_to(goal.subGoals);
 }
 
 struct Level {
@@ -75,9 +77,12 @@ struct Level {
     std::vector<Currency> currencies;
     std::vector<Init> inits;
     std::vector<Action> actions;
-    std::vector<Objective> objectives;
+    std::vector<Goal> goals;
+    int currencyCount;
+    int actionCount;
+    std::unordered_map<std::string, int> currencyNameToId;
 
-    static Level fromFile(std::string filename);
+    static Level fromFile(std::string& filename);
 };
 
 void from_json(const nlohmann::json& j, Level& level) {
@@ -86,16 +91,23 @@ void from_json(const nlohmann::json& j, Level& level) {
     j.at("currencies").get_to(level.currencies);
     j.at("inits").get_to(level.inits);
     j.at("actions").get_to(level.actions);
-    j.at("objectives").get_to(level.objectives);
+    j.at("goals").get_to(level.goals);
+    level.currencyCount = level.currencies.size();
+    level.actionCount = level.actions.size();
+    for (int id = 0; id < level.currencyCount; id++) {
+        Currency& currency = level.currencies[id];
+        level.currencyNameToId[currency.name] = id;
+    }
 }
 
-Level Level::fromFile(std::string filename) {
+Level Level::fromFile(std::string& filename) {
     std::ifstream file(filename);
     nlohmann::json j = nlohmann::json::parse(file);
     return j.get<Level>();
 }
 
-int main() {
-    Level level = Level::fromFile("levels/tutorials/tutorial1.json");
-    std::cout << level.currencies[0].name << std::endl;
-}
+// int main() {
+//     Level level = Level::fromFile("levels/tutorials/tutorial1.json");
+// }
+
+#endif

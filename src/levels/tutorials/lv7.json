@@ -1,0 +1,61 @@
+{
+    "name": "Level 7: Sacrifice",
+    "description": "blah\nblah",
+    "currencies": [
+        {
+            "name": "Coin",
+            "effects": [
+                
+            ]
+        },
+        {
+            "name": "Farmer",
+            "effects": [
+                {
+                    "name": "Coin",
+                    "increment": 4
+                }
+            ]
+        }
+    ],
+    "inits": [
+        {
+            "name": "Coin",
+            "amount": 0
+        }, {
+            "name": "Farmer",
+            "amount": 2
+        }, {
+            "name": "Turns",
+            "amount": 3
+        }
+    ],
+    "actions": [
+        {
+            "name": "Sell a farmer",
+            "effects": [
+                {
+                    "name": "Farmer",
+                    "increment": -1
+                }, {
+                    "name": "Coin",
+                    "increment": 8
+                }
+            ],
+            "requirements": []
+        }
+    ],
+    "goals": [
+        {
+            "name": "Main Goal",
+            "requirements": [
+                {
+                    "name": "Coin",
+                    "type": "greater-equal",
+                    "amount": 25
+                }
+            ],
+            "subGoals": []
+        }
+    ]
+}
